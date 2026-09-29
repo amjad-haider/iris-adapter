@@ -1,6 +1,6 @@
 
 # IRIS Adapter
-
+A Python package for reading different data sources, converting records into a common format, validating them, and loading them into PostgreSQL/PostGIS staging.
 
 ## Quick Start
 
