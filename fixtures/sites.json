@@ -1,0 +1,22 @@
+[
+  {"id": "site-001", "country": "DE", "region": "NW", "name": "Synthetic site 01"},
+  {"id": "site-002", "country": "DE", "region": "NW", "name": "Synthetic site 02"},
+  {"id": "site-003", "country": "DE", "region": "NW", "name": "Synthetic site 03"},
+  {"id": "site-004", "country": "DE", "region": "NW", "name": "Synthetic site 04"},
+  {"id": "site-005", "country": "DE", "region": "NW", "name": "Synthetic site 05"},
+  {"id": "site-006", "country": "DE", "region": "NW", "name": "Synthetic site 06"},
+  {"id": "site-007", "country": "DE", "region": "NW", "name": "Synthetic site 07"},
+  {"id": "site-008", "country": "DE", "region": "NW", "name": "Synthetic site 08"},
+  {"id": "site-009", "country": "DE", "region": "NW", "name": "Synthetic site 09"},
+  {"id": "site-010", "country": "DE", "region": "NW", "name": "Synthetic site 10"},
+  {"id": "site-011", "country": "DE", "region": "NW", "name": "Synthetic site 11"},
+  {"id": "site-012", "country": "DE", "region": "NW", "name": "Synthetic site 12"},
+  {"id": "site-013", "country": "DE", "region": "NW", "name": "Synthetic site 13"},
+  {"id": "site-014", "country": "DE", "region": "NW", "name": "Synthetic site 14"},
+  {"id": "site-015", "country": "DE", "region": "NW", "name": "Synthetic site 15"},
+  {"id": "site-016", "country": "DE", "region": "NW", "name": "Synthetic site 16"},
+  {"id": "site-017", "country": "DE", "region": "NW", "name": "Synthetic site 17"},
+  {"id": "site-018", "country": "DE", "region": "NW", "name": "Synthetic site 18"},
+  {"id": "site-019", "country": "DE", "region": "NW", "name": "Synthetic site 19"},
+  {"id": "site-020", "country": "DE", "region": "NW", "name": "Synthetic site 20"}
+]
