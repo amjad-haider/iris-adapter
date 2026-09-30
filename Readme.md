@@ -172,3 +172,7 @@ uv run --env-file .env pytest -q        # all 72, needs docker compose up
 ## Acceptance criteria
 
 
+1. Clean run imports at least 20 fixture records.
+2. A second adapter is implemented only by subclassing/implementing the documented interface.
+3. Invalid `country_code` is rejected rather than defaulted to `DE`.
+4. Geometry field is named `geom` in the canonical contract.
