@@ -86,9 +86,63 @@ Subclass `SourceAdapter`, implement `extract()` and `normalize()`, and set `sour
 
 ## Tests
 
-What each test file covers
+```bash
+uv run pytest -q                        # 69 pass, 3 PostGIS tests skipped
+uv run --env-file .env pytest -q        # all 72, needs docker compose up
+```
 
-## Design decisions
+**test_adapter_contract.py** — a second adapter plugs in without core changes
+- `second_adapter_runs_through_shared_pipeline`: new adapter defined in the test loads via the unchanged pipeline
+- `second_adapter_gets_shared_country_validation`: its invalid country is rejected by the core
+- `adapter_missing_normalize_cannot_be_instantiated`: incomplete adapters fail at creation
+
+**test_pipeline.py** — batch behaviour
+- `pipeline_loads_complete_batch_in_utc`: 20 records loaded, `fetched_at` converted to UTC
+- `invalid_record_prevents_loading_entire_batch`: one bad record → nothing loaded
+- `error_names_the_failing_record`: error includes position and record ID
+- `missing_source_field_is_reported_as_value_error`: missing field → clear `ValueError`
+- `duplicate_record_in_batch_is_rejected`: same key twice → rejected
+- `pipeline_rejects_naive_timestamp`: `fetched_at` without timezone → rejected
+
+**test_validation.py** — country code
+- `accepts_valid_country_codes`: `DE`, `AT`, `FR` pass
+- `rejects_invalid_country_codes`: `None`, empty, `ZZ`, `de`, `DEU`, `" DE "`, `123` fail
+
+**test_record_validation.py** — record fields
+- `accepts_valid_record_identity`: a complete record passes
+- `rejects_invalid_identifiers`: empty/non-string `source_id`, `source_record_id` fail
+- `record_validation_rejects_invalid_country`: `ZZ` fails
+- `rejects_invalid_source_date`: string, datetime, `None` fail
+- `rejects_invalid_fetched_at`: string, date, naive datetime fail
+- `accepts_unknown_region`: `region_code = None` passes
+- `rejects_invalid_region`: empty/non-string region fails
+- `accepts_empty_attributes`: `{}` passes
+- `rejects_invalid_attributes`: non-dict, non-JSON values, NaN, inf fail
+
+**test_geometry.py** — geometry
+- `accepts_valid_geometry`: valid Point and Polygon pass unchanged
+- `preserves_missing_geometry`: `None` stays `None`
+- `rejects_unknown_or_unsupported_crs`: missing CRS or EPSG:3857 fails
+- `rejects_invalid_geometry`: out-of-bounds, 3D, NaN/inf, strings, self-intersecting polygon fail
+
+**test_fixture_adapter.py** — JSON adapter
+- `fixture_records_are_normalized`: 20 records mapped correctly
+- `missing_country_is_rejected`: missing country is not defaulted
+
+**test_csv_points_adapter.py** — CSV adapter
+- `csv_adapter_uses_shared_pipeline`: 2 points mapped with correct geometry
+- `invalid_csv_coordinates_prevent_loading`: longitude 181 → nothing loaded
+
+**test_serialization.py** — output
+- `pipeline_exports_normalized_records_as_jsonl`: JSONL matches the canonical shape
+
+**test_loading.py** — PostGIS (needs database)
+- `repeat_import_updates_without_duplicates`: re-import updates, no duplicate rows
+- `database_error_rolls_back_entire_batch`: one DB error → whole batch rolled back
+- `spatial_adapter_preserves_srid_and_country_isolation`: SRID 4326 kept; same ID in DE and AT stays separate
+
+
+## Design decisions and learning outcomes
 
 ## Assumptions and simplifications
 
