@@ -101,6 +101,26 @@ def test_missing_source_field_is_reported_as_value_error(tmp_path):
 
     loader.assert_not_called()
 
+def test_duplicate_record_in_batch_is_rejected(tmp_path):
+    rows = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    rows[5]["id"] = rows[0]["id"]
+
+    path = tmp_path / "duplicate_sites.json"
+    path.write_text(json.dumps(rows), encoding="utf-8")
+    loader = Mock()
+
+    with pytest.raises(
+        ValueError,
+        match=r"record 6 \('site-001'\): duplicate record key",
+    ):
+        run_pipeline(
+            make_adapter(path),
+            load=loader,
+            fetched_at=datetime(2026, 9, 29, tzinfo=UTC),
+        )
+
+    loader.assert_not_called()
+
 
 def test_pipeline_rejects_naive_timestamp():
     loader = Mock()

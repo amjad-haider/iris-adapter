@@ -25,6 +25,7 @@ def run_pipeline(
 
     timestamp = timestamp.astimezone(UTC)
     records: list[CanonicalRecord] = []
+    seen_keys: set[tuple[str, str, str]] = set()
 
     for position, raw_record in enumerate(adapter.extract(), start=1):
         label = f"record {position}"
@@ -42,13 +43,21 @@ def run_pipeline(
                     source_crs=adapter.source_crs,
                 ),
             )
+            key = (
+                record.country_code,
+                record.source_id,
+                record.source_record_id,
+            )
+            if key in seen_keys:
+                raise ValueError(f"duplicate record key {key}")
+
         except KeyError as exc:
             raise ValueError(f"{label}: missing field {exc}") from exc
         except ValueError as exc:
             raise ValueError(f"{label}: {exc}") from exc
 
+        seen_keys.add(key)
         records.append(record)
-
 
     load(records)
     return len(records)
