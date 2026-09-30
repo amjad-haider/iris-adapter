@@ -66,6 +66,42 @@ def test_invalid_record_prevents_loading_entire_batch(tmp_path):
     loader.assert_not_called()
 
 
+def test_error_names_the_failing_record(tmp_path):
+    rows = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    rows[4]["country"] = "ZZ"
+
+    path = tmp_path / "invalid_sites.json"
+    path.write_text(json.dumps(rows), encoding="utf-8")
+
+    with pytest.raises(
+        ValueError,
+        match=r"record 5 \('site-005'\): Invalid country_code",
+    ):
+        run_pipeline(
+            make_adapter(path),
+            load=Mock(),
+            fetched_at=datetime(2026, 9, 29, tzinfo=UTC),
+        )
+
+
+def test_missing_source_field_is_reported_as_value_error(tmp_path):
+    rows = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
+    del rows[2]["id"]
+
+    path = tmp_path / "missing_id.json"
+    path.write_text(json.dumps(rows), encoding="utf-8")
+    loader = Mock()
+
+    with pytest.raises(ValueError, match=r"record 3: missing field 'id'"):
+        run_pipeline(
+            make_adapter(path),
+            load=loader,
+            fetched_at=datetime(2026, 9, 29, tzinfo=UTC),
+        )
+
+    loader.assert_not_called()
+
+
 def test_pipeline_rejects_naive_timestamp():
     loader = Mock()
 

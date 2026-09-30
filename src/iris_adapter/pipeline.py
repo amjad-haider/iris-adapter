@@ -26,19 +26,29 @@ def run_pipeline(
     timestamp = timestamp.astimezone(UTC)
     records: list[CanonicalRecord] = []
 
-    for raw_record in adapter.extract():
-        record = adapter.normalize(raw_record, fetched_at=timestamp)
-        validate_record(record)
+    for position, raw_record in enumerate(adapter.extract(), start=1):
+        label = f"record {position}"
 
-        record = replace(
-            record,
-            fetched_at=record.fetched_at.astimezone(UTC),
-            geom=normalize_geometry(
-                record.geom,
-                source_crs=adapter.source_crs,
-            ),
-        )
+        try:
+            record = adapter.normalize(raw_record, fetched_at=timestamp)
+            label = f"record {position} ({record.source_record_id!r})"
+            validate_record(record)
+
+            record = replace(
+                record,
+                fetched_at=record.fetched_at.astimezone(UTC),
+                geom=normalize_geometry(
+                    record.geom,
+                    source_crs=adapter.source_crs,
+                ),
+            )
+        except KeyError as exc:
+            raise ValueError(f"{label}: missing field {exc}") from exc
+        except ValueError as exc:
+            raise ValueError(f"{label}: {exc}") from exc
+
         records.append(record)
+
 
     load(records)
     return len(records)
