@@ -1,6 +1,7 @@
 import pycountry
 from iris_adapter.models import CanonicalRecord
 from datetime import date, datetime
+import json
 
 
 def validate_country_code(country_code: object) -> None:
@@ -37,3 +38,19 @@ def validate_record(record: CanonicalRecord) -> None:
 
     if record.fetched_at.utcoffset() is None:
         raise ValueError("fetched_at must include timezone information")
+
+    ### CHECK FOR CORRECT REGION CODE
+    if record.region_code is not None:
+        if (
+            not isinstance(record.region_code, str)
+            or not record.region_code.strip()
+        ):
+            raise ValueError("region_code must be a non-empty string or None")
+
+    if not isinstance(record.attributes, dict):
+        raise ValueError("attributes must be a dictionary")
+
+    try:
+        json.dumps(record.attributes, allow_nan=False)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("attributes must contain valid JSON values") from exc

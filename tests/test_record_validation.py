@@ -70,3 +70,38 @@ def test_rejects_invalid_fetched_at(record, value):
 
     with pytest.raises(ValueError, match="fetched_at"):
         validate_record(record)
+
+
+def test_accepts_unknown_region(record):
+    record.region_code = None
+    validate_record(record)
+
+
+@pytest.mark.parametrize("value", ["", " ", 123])
+def test_rejects_invalid_region(record, value):
+    record.region_code = value
+
+    with pytest.raises(ValueError, match="region_code"):
+        validate_record(record)
+
+
+def test_accepts_empty_attributes(record):
+    record.attributes = {}
+    validate_record(record)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        None,
+        [],
+        {"observed_on": date(2026, 9, 1)},
+        {"score": float("nan")},
+        {"score": float("inf")},
+    ],
+)
+def test_rejects_invalid_attributes(record, value):
+    record.attributes = value
+
+    with pytest.raises(ValueError, match="attributes"):
+        validate_record(record)
