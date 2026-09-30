@@ -2,10 +2,13 @@
 # IRIS Adapter
 A Python package for reading different data sources, converting records into a common format, validating them, and loading them into PostgreSQL/PostGIS staging.
 
-## Quick Start
-
-
 ## Requirements
+
+- Python 3.12+
+- [uv](https://docs.astral.sh/uv/) (it installs the dependencies from `uv.lock`)
+- Docker, only for the PostgreSQL/PostGIS part (PostgreSQL 16, PostGIS 3.5)
+
+## Quick Start
 
 
 ## Architecture
@@ -23,9 +26,3 @@ A Python package for reading different data sources, converting records into a c
 What each test file covers
 
 
-## Deliverables
-
-- [] Python package
-- [] pytest test suite
-- [] README with one-command run
-- [] Example normalized output as JSONL
