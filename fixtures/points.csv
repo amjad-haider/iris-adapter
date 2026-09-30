@@ -1,0 +1,3 @@
+location_id,iso_country,admin_region,label,longitude,latitude
+point-001,DE,NW,Synthetic location DE,7.46,51.51
+point-001,AT,9,Synthetic location AT,16.37,48.21
