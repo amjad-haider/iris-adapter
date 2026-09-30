@@ -38,3 +38,35 @@ def test_record_validation_rejects_invalid_country(record):
 
     with pytest.raises(ValueError, match="country_code"):
         validate_record(record)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        None,
+        "2026-09-01",
+        123,
+        datetime(2026, 9, 1, tzinfo=UTC),
+    ],
+)
+def test_rejects_invalid_source_date(record, value):
+    record.source_date = value
+
+    with pytest.raises(ValueError, match="source_date"):
+        validate_record(record)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        None,
+        "2026-09-29T00:00:00Z",
+        date(2026, 9, 29),
+        datetime(2026, 9, 29),
+    ],
+)
+def test_rejects_invalid_fetched_at(record, value):
+    record.fetched_at = value
+
+    with pytest.raises(ValueError, match="fetched_at"):
+        validate_record(record)

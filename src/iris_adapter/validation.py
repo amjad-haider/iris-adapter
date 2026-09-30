@@ -1,5 +1,6 @@
 import pycountry
 from iris_adapter.models import CanonicalRecord
+from datetime import date, datetime
 
 
 def validate_country_code(country_code: object) -> None:
@@ -16,7 +17,7 @@ def validate_country_code(country_code: object) -> None:
         raise ValueError(f"Invalid country_code: {country_code!r}")
 
 def validate_record(record: CanonicalRecord) -> None:
-    """Validate country and record identifiers."""
+    """Validate country, identifiers, and dates."""
     validate_country_code(record.country_code)
 
     for field in ("source_id", "source_record_id"):
@@ -24,3 +25,15 @@ def validate_record(record: CanonicalRecord) -> None:
 
         if not isinstance(value, str) or not value.strip():
             raise ValueError(f"{field} must be a non-empty string")
+
+    if (
+        not isinstance(record.source_date, date)
+        or isinstance(record.source_date, datetime)
+    ):
+        raise ValueError("source_date must be a date without a time")
+
+    if not isinstance(record.fetched_at, datetime):
+        raise ValueError("fetched_at must be a datetime")
+
+    if record.fetched_at.utcoffset() is None:
+        raise ValueError("fetched_at must include timezone information")
