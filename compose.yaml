@@ -9,6 +9,7 @@ services:
       - "127.0.0.1:55432:5432"
     volumes:
       - iris_pgdata:/var/lib/postgresql/data
+      - ./migrations/001_create_staging.sql:/docker-entrypoint-initdb.d/20_001_create_staging.sql:ro
     healthcheck:
       test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "iris", "-d", "iris"]
       interval: 5s
