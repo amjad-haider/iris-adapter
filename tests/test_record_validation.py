@@ -4,6 +4,7 @@ import pytest
 
 from iris_adapter.models import CanonicalRecord
 from iris_adapter.validation import validate_record
+from dataclasses import replace
 
 
 @pytest.fixture
@@ -27,14 +28,14 @@ def test_accepts_valid_record_identity(record):
 @pytest.mark.parametrize("field", ["source_id", "source_record_id"])
 @pytest.mark.parametrize("value", [None, "", " ", 123])
 def test_rejects_invalid_identifiers(record, field, value):
-    setattr(record, field, value)
+    record = replace(record, **{field: value})
 
     with pytest.raises(ValueError, match=field):
         validate_record(record)
 
 
 def test_record_validation_rejects_invalid_country(record):
-    record.country_code = "ZZ"
+    record = replace(record, country_code="ZZ")
 
     with pytest.raises(ValueError, match="country_code"):
         validate_record(record)
@@ -50,7 +51,7 @@ def test_record_validation_rejects_invalid_country(record):
     ],
 )
 def test_rejects_invalid_source_date(record, value):
-    record.source_date = value
+    record = replace(record, source_date=value)
 
     with pytest.raises(ValueError, match="source_date"):
         validate_record(record)
@@ -66,27 +67,27 @@ def test_rejects_invalid_source_date(record, value):
     ],
 )
 def test_rejects_invalid_fetched_at(record, value):
-    record.fetched_at = value
+    record = replace(record, fetched_at=value)
 
     with pytest.raises(ValueError, match="fetched_at"):
         validate_record(record)
 
 
 def test_accepts_unknown_region(record):
-    record.region_code = None
+    record = replace(record, region_code=None)
     validate_record(record)
 
 
 @pytest.mark.parametrize("value", ["", " ", 123])
 def test_rejects_invalid_region(record, value):
-    record.region_code = value
+    record = replace(record, region_code=value)
 
     with pytest.raises(ValueError, match="region_code"):
         validate_record(record)
 
 
 def test_accepts_empty_attributes(record):
-    record.attributes = {}
+    record = replace(record, attributes={})
     validate_record(record)
 
 
@@ -101,7 +102,7 @@ def test_accepts_empty_attributes(record):
     ],
 )
 def test_rejects_invalid_attributes(record, value):
-    record.attributes = value
+    record = replace(record, attributes=value)
 
     with pytest.raises(ValueError, match="attributes"):
         validate_record(record)

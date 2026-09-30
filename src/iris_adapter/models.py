@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date, datetime
 
-@dataclass
+@dataclass(frozen=True)
 class CanonicalRecord:
     """Record structure produced by source adapters."""
 
