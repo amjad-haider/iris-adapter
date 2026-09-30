@@ -31,14 +31,20 @@ def main() -> None:
         help="Source publication date in YYYY-MM-DD format.",
     )
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--no-db",
+        action="store_true",
+        help="Skip PostgreSQL loading and only write the JSONL output.",
+    )
     args = parser.parse_args()
 
     dsn = os.getenv("IRIS_DATABASE_URL")
-    if not dsn or not dsn.strip():
+    if not args.no_db and (not dsn or not dsn.strip()):
         parser.error(
             "IRIS_DATABASE_URL is missing. "
-            "Run with uv run --env-file .env."
+            "Run with uv run --env-file .env, or pass --no-db."
         )
+
 
     adapter_class = ADAPTERS[args.adapter]
     adapter = adapter_class(
@@ -46,10 +52,11 @@ def main() -> None:
         source_id=args.source_id,
         source_date=args.source_date,
     )
-    loader = PostgresLoader(dsn)
+    loader = None if args.no_db else PostgresLoader(dsn)
 
     def load_and_export(records: list[CanonicalRecord]) -> None:
-        loader.load(records)
+        if loader is not None:
+            loader.load(records)
         write_jsonl(records, args.output)
 
     count = run_pipeline(adapter, load=load_and_export)
