@@ -144,7 +144,25 @@ uv run --env-file .env pytest -q        # all 72, needs docker compose up
 
 ## Design decisions and learning outcomes
 
+- **Adapters do not validate.** Validation is in the core, so a new adapter cannot skip it or default a missing `country_code`.
+- **All or nothing.** If any record is invalid, nothing is loaded and the error names the record, for example `record 5 ('site-005'): Invalid country_code: 'ZZ'`.
+- **Explicit CRS.** A geometry is only accepted if the adapter declares `source_crs = "EPSG:4326"`. Invalid geometry is rejected, never repaired.
+- **Checks in two places.** The database has CHECK constraints for the same rules, so bad data cannot enter staging even if it bypasses the Python code.
+- **Idempotent loads.** Running the same import twice updates rows instead of duplicating them.
+- **Immutable records.** `CanonicalRecord` is frozen, so a record cannot change after validation.
+
 ## Assumptions and simplifications
+
+| Simplification | Production direction |
+|---|---|
+| Only EPSG:4326 is accepted, with no reprojection | Reproject with `pyproj` or `ST_Transform`, and store the original CRS as metadata |
+| One invalid record rejects the whole batch | Optional quarantine table with rejection reasons, plus a configurable error threshold |
+| `region_code` is only checked to be non-empty | Validate against ISO 3166-2 subdivisions for the record's country |
+| `source_id` and `source_date` are passed on the command line | Read them from a source registry or the source's own metadata |
+| Staging only, no promotion step | Promotion from staging to curated tables with QA gates |
+| One SQL migration applied by Docker init | A migration tool such as Alembic or Sqitch with version tracking |
+| Adapters are registered by hand in the CLI | Discover adapters through Python entry points |
+
 
 ## Example output
 
