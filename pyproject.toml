@@ -1,7 +1,7 @@
 [project]
 name = "iris-adapter"
 version = "0.1.0"
-description = "Add your description here"
+description = "Reusable source adapter contract for IRIS ingestion"
 readme = "Readme.md"
 authors = [
     { name = "amjad-haider", email = "amjadckhaid@gmail.com" }
