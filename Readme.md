@@ -166,6 +166,9 @@ uv run --env-file .env pytest -q        # all 72, needs docker compose up
 
 ## Example output
 
+`examples/sites.normalized.jsonl` (20 records, no geometry) and `examples/points.normalized.jsonl` (2 records with point geometry) were produced by the Quick Start commands. `fetched_at` is the time of the run, so it changes each time.
+
+
 ## Acceptance criteria
 
 
