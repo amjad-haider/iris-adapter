@@ -42,6 +42,47 @@ docker compose exec db psql -U iris -d iris -c "SELECT country_code, source_id, 
 
 ## Architecture
 
+```text
+adapter.extract()  ->  adapter.normalize()  ->  validate_record()  ->  normalize_geometry()  ->  load(records)
+  source-specific        source-specific          shared core            shared core            PostgresLoader
+                                                                                                 and/or write_jsonl
+```
+
+| Module | Responsibility |
+|---|---|
+| `adapters/base.py` | `SourceAdapter` abstract base class: `extract()`, `normalize()`, `source_crs` |
+| `adapters/fixture.py` | JSON fixture adapter (tabular, no geometry) |
+| `adapters/csv_points.py` | CSV adapter with lon/lat points (second adapter) |
+| `models.py` | `CanonicalRecord`, a frozen dataclass |
+| `validation.py` | Country code, identifiers, dates, region and attribute checks |
+| `geometry.py` | GeoJSON validation and normalization in EPSG:4326 |
+| `pipeline.py` | `run_pipeline()`: validates the whole batch, then calls the loader once |
+| `loading.py` | `PostgresLoader`: one transaction, upsert on `(country_code, source_id, source_record_id)` |
+| `serialization.py` | JSONL export |
+| `migrations/001_create_staging.sql` | `staging.records` with CHECK constraints, `geom geometry(Geometry, 4326)` and a GiST index |
+
+### Canonical record
+
+```json
+{
+  "country_code": "DE",
+  "region_code": "NW",
+  "source_id": "fixture-sites",
+  "source_record_id": "site-001",
+  "source_date": "2026-09-01",
+  "fetched_at": "2026-09-30T07:41:36+00:00",
+  "attributes": {"name": "Synthetic site 01"},
+  "geom": null
+}
+```
+
+`source_record_id` is added to the minimum contract so that a record can be identified and upserted. The key is scoped by country: `(country_code, source_id, source_record_id)`.
+
+### Adding a new adapter
+
+Subclass `SourceAdapter`, implement `extract()` and `normalize()`, and set `source_crs` if the source has geometry. Nothing in the shared core changes. `tests/test_adapter_contract.py` shows a complete example. To expose it in the CLI, add one line to `ADAPTERS` in `__main__.py`.
+
+
 
 ## Tests
 
