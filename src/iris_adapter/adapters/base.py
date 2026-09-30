@@ -8,7 +8,8 @@ from iris_adapter.models import CanonicalRecord
 
 class SourceAdapter(ABC):
     """Interface that every source adapter must implement."""
-
+    source_crs: str | None = None
+    
     @abstractmethod
     def extract(self) -> Iterable[dict[str, Any]]:
         """Read the source and return its raw records."""
